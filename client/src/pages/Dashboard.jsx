@@ -1,19 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Line, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { LineChart, Line, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import dayjs from 'dayjs';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend);
+import Button from '../components/ui/Button'; // Assuming you have a Button component
 
 const Dashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -36,94 +26,106 @@ const Dashboard = () => {
 
   if (!summary) return <p>Loading...</p>;
 
-  const lineData = {
-    labels: summary.incomeExpense.map((m) => m.month),
-    datasets: [
-      {
-        label: 'Income',
-        data: summary.incomeExpense.map((m) => m.income),
-        borderColor: 'green',
-        backgroundColor: 'rgba(0,128,0,0.2)',
-      },
-      {
-        label: 'Expenses',
-        data: summary.incomeExpense.map((m) => m.expenses),
-        borderColor: 'red',
-        backgroundColor: 'rgba(255,0,0,0.2)',
-      },
-    ],
-  };
+  console.log('Dashboard Summary:', summary); // Log the entire summary object
 
-  const pieData = {
-    labels: summary.categoryPie.map((c) => c.category),
-    datasets: [
-      {
-        data: summary.categoryPie.map((c) => c.amount),
-        backgroundColor: [
-          '#4e73df',
-          '#1cc88a',
-          '#36b9cc',
-          '#f6c23e',
-          '#e74a3b',
-          '#858796',
-        ],
-      },
-    ],
-  };
+  const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'];
+
+  const lineChartData = summary.monthlyTrends.map(item => ({
+    month: item.month,
+    Income: item.income,
+    Expenses: item.expenses,
+  }));
+  console.log('Line Chart Data:', lineChartData); // Log line chart data
+
+  const pieChartData = summary.topCategories.map(item => ({
+    name: item.category,
+    value: item.amount,
+  }));
+  console.log('Pie Chart Data:', pieChartData); // Log pie chart data
 
   return (
-    <div>
-      <h3>Dashboard</h3>
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card text-white bg-success mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Total Income</h5>
-              <p className="card-text fs-4">₹{summary.totalIncome.toFixed(2)}</p>
-            </div>
-          </div>
+    <div className="dashboard-container">
+      <h3 className="dashboard-title">Dashboard</h3>
+
+      <div className="summary-cards-grid">
+        <div className="summary-card income-card">
+          <h5 className="card-title">Total Income</h5>
+          <p className="card-value">₹{summary.totalIncome.toFixed(2)}</p>
         </div>
-        <div className="col-md-4">
-          <div className="card text-white bg-danger mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Total Expenses</h5>
-              <p className="card-text fs-4">₹{summary.totalExpenses.toFixed(2)}</p>
-            </div>
-          </div>
+        <div className="summary-card expense-card">
+          <h5 className="card-title">Total Expenses</h5>
+          <p className="card-value">₹{summary.totalExpenses.toFixed(2)}</p>
         </div>
-        <div className="col-md-4">
-          <div className={`card text-white ${summary.net >= 0 ? 'bg-primary' : 'bg-warning'} mb-3`}>
-            <div className="card-body">
-              <h5 className="card-title">Net</h5>
-              <p className="card-text fs-4">₹{summary.net.toFixed(2)}</p>
-            </div>
-          </div>
+        <div className={`summary-card net-card ${summary.net >= 0 ? 'net-positive' : 'net-negative'}`}>
+          <h5 className="card-title">Net Savings</h5>
+          <p className="card-value">₹{summary.net.toFixed(2)}</p>
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-8 mb-4">
-          <h5>Income vs Expenses (Last 6 Months)</h5>
-          <Line data={lineData} />
+      <div className="chart-section">
+        <div className="chart-card">
+          <h5 className="chart-title">Income vs Expenses (Last 6 Months)</h5>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={lineChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="Income" stroke="#1cc88a" activeDot={{ r: 8 }} />
+              <Line type="monotone" dataKey="Expenses" stroke="#e74a3b" />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-        <div className="col-md-4 mb-4">
-          <h5>Spending Breakdown</h5>
-          <Pie data={pieData} />
+
+        <div className="chart-card">
+          <h5 className="chart-title">Spending Breakdown</h5>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieChartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+              >
+                {pieChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
       {budgetAlerts.length > 0 && (
-        <div className="alert alert-warning">
-          <h5>Budget Alerts</h5>
-          <ul className="mb-0">
+        <div className="alerts-section">
+          <h5 className="alerts-title">Budget Alerts</h5>
+          <ul className="alerts-list">
             {budgetAlerts.map((b) => (
-              <li key={b._id}>
-                {b.category}: {b.percent}% of ₹{b.limit} used.
+              <li key={b._id} className="alert-item">
+                <span className="alert-category">{b.category}:</span> {b.percent.toFixed(2)}% of ₹{b.limit.toFixed(2)} used.
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      <div className="action-buttons-section">
+        <Link to="/connect-bank">
+          <Button variant="primary" size="md">
+            Connect Bank Account
+          </Button>
+        </Link>
+        <Button variant="secondary" size="md" onClick={() => api.get('/bank/transactions').then(fetchData)}>
+          Fetch New Transactions
+        </Button>
+      </div>
     </div>
   );
 };

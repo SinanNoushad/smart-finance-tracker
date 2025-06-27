@@ -10,6 +10,7 @@ import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Goals from './pages/Goals';
 import ReportPage from './pages/ReportPage';
+import BankConnect from './pages/BankConnect'; // Import the new BankConnect page
 import { AuthContext } from './context/AuthContext';
 import './styles/global.css';
 
@@ -73,6 +74,14 @@ const AppContent = () => {
               element={
                 <ProtectedRoute>
                   <ReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/connect-bank"
+              element={
+                <ProtectedRoute>
+                  <BankConnect />
                 </ProtectedRoute>
               }
             />

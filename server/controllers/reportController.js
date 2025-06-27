@@ -24,14 +24,15 @@ exports.getMonthlyReportPdf = asyncHandler(async (req, res) => {
       const start = dayjs(month).startOf('month').toDate();
       const end = dayjs(month).endOf('month').toDate();
       
-      transactions = await Transaction.find({ 
-        user: req.user._id, 
-        date: { $gte: start, $lte: end } 
+      transactions = await Transaction.find({
+        userId: req.user._id,
+        date: { $gte: start, $lte: end },
+        isMock: false // Exclude mock transactions for real reports
       }).sort({ date: 1 }).lean();
       
       if (transactions.length === 0) {
-        return res.status(404).json({ 
-          success: false, 
+        return res.status(404).json({
+          success: false,
           message: 'No transactions found for the selected period',
           mockAvailable: true
         });

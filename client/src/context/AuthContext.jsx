@@ -21,8 +21,8 @@ export const AuthProvider = ({ children }) => {
         const storedToken = localStorage.getItem('sft_token');
         if (storedToken) {
           // Optionally validate the token with the server here
-          const { data } = await api.get('/auth/me');
-          setUser(data.user);
+          const { data } = await api.get('/auth/profile');
+          setUser(data); // The profile endpoint returns the user object directly
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
