@@ -4,10 +4,10 @@ const path = require('path');
 module.exports = {
   entry: './src/index.jsx',
   output: {
-    path: path.resolve(__dirname, 'public'),
-    filename: 'bundle.js',
-    publicPath: '/',
-  },
+  path: path.resolve(__dirname, 'build'), // ✅ must match Netlify publish dir
+  filename: 'bundle.js',
+  publicPath: '/',
+},
 
   // tell webpack how to process JS / JSX
   module: {
