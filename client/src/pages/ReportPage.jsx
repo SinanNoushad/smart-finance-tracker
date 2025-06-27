@@ -9,16 +9,52 @@ const ReportPage = () => {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const response = await api.get(`/reports/pdf?month=${month}`, { responseType: 'blob' });
+      console.log('Initiating PDF download for month:', month);
+      const response = await api.get(`/reports/pdf?month=${month}`, { 
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      });
+      
+      console.log('Received response, status:', response.status);
+      
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+      
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `report-${month}.pdf`);
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      
+      // Cleanup
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+      }, 100);
+      
     } catch (err) {
-      alert('Failed to download report');
+      console.error('Download error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        statusText: err.response?.statusText
+      });
+      
+      let errorMessage = 'Failed to download report';
+      if (err.response?.status === 401) {
+        errorMessage = 'Please log in to download reports';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'No data found for the selected period';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setDownloading(false);
     }

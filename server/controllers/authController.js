@@ -10,8 +10,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    res.status(400);
-    throw new Error('User already exists');
+      return res.status(400).json({ message: 'User already exists' });
   }
 
   const user = await User.create({ name, email, password });
@@ -24,8 +23,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(400);
-    throw new Error('Invalid user data');
+      return res.status(400).json({ message: 'Invalid user data' });
   }
 });
 
@@ -44,8 +42,7 @@ exports.authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401);
-    throw new Error('Invalid email or password');
+    return res.status(401).json({ message: 'Invalid email or password' });
   }
 });
 
@@ -58,7 +55,6 @@ exports.getUserProfile = asyncHandler(async (req, res) => {
   if (user) {
     res.json(user);
   } else {
-    res.status(404);
-    throw new Error('User not found');
+      return res.status(404).json({ message: 'User not found' });
   }
 });
