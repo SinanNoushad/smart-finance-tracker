@@ -11,6 +11,7 @@ const budgetRoutes = require('./routes/budgets');
 const goalRoutes = require('./routes/goals');
 const dashboardRoutes = require('./routes/dashboard');
 const reportRoutes = require('./routes/reports');
+const bankRoutes = require('./routes/bank');
 
 // Initialize Express app
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/bank', bankRoutes);
 
 // Error Handling Middleware
 // Global Error Handling Middleware
